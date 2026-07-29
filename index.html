@@ -53,6 +53,12 @@
       border: none;
       box-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
     }
+    /* Hide Number Input Arrows */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   </style>
 </head>
 <body class="bg-[#0F172A] text-slate-100 font-sans antialiased selection:bg-orange-500 selection:text-white min-h-screen flex flex-col justify-between">
@@ -80,7 +86,6 @@
 
     <!-- 1. Hero 區塊 -->
     <section class="text-center relative py-6">
-      <!-- Glow Background -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-orange-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
       <div class="relative z-10">
@@ -94,7 +99,7 @@
         </h1>
 
         <p class="mt-6 text-base sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          為什麼跌 <span class="text-rose-400 font-bold">50%</span> 需要漲 <span class="text-emerald-400 font-bold">100%</span> 才能回本？拉動下方數據滑桿，用直觀的數據與動態圖表親自體驗「數學的殘酷真相」。
+          為什麼跌 <span class="text-rose-400 font-bold">50%</span> 需要漲 <span class="text-emerald-400 font-bold">100%</span> 才能回本？輸入你的本金並拖動跌幅滑桿，親自體驗「數學的殘酷真相」。
         </p>
       </div>
     </section>
@@ -106,26 +111,51 @@
           <i data-lucide="sliders" class="w-6 h-6 text-orange-400"></i>
           互動實驗計算機
         </h2>
-        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">可拖動滑桿即時計算</span>
+        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">可自訂本金與跌幅</span>
       </div>
 
-      <!-- 快速情境按鈕組 -->
-      <div class="mb-8 flex flex-wrap items-center gap-3">
-        <span class="text-sm font-medium text-slate-400 mr-1">快速切換情境：</span>
-        <button onclick="setLoss(10)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95 flex items-center gap-1.5">
-          <span>跌 10%</span> <span class="text-xs text-emerald-400">(回本 +11.1%)</span>
-        </button>
-        <button onclick="setLoss(20)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95 flex items-center gap-1.5">
-          <span>跌 20%</span> <span class="text-xs text-emerald-400">(回本 +25%)</span>
-        </button>
-        <button onclick="setLoss(50)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-orange-950/40 hover:bg-orange-900/40 text-orange-300 border border-orange-500/30 transition-all active:scale-95 flex items-center gap-1.5">
-          <i data-lucide="zap" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span>跌 50%</span> <span class="text-xs text-orange-400 font-bold">(回本 +100%)</span>
-        </button>
-        <button onclick="setLoss(80)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-950/40 hover:bg-rose-900/40 text-rose-300 border border-rose-500/30 transition-all active:scale-95 flex items-center gap-1.5">
-          <i data-lucide="skull" class="w-3.5 h-3.5 text-rose-400"></i>
-          <span>跌 80%</span> <span class="text-xs text-rose-400 font-bold">(回本 +400%)</span>
-        </button>
+      <!-- 輸入控制區：手動本金 + 快速按鈕 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-end">
+        
+        <!-- 手動本金輸入框 -->
+        <div class="lg:col-span-5 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+          <label for="principalInput" class="block text-xs font-semibold text-slate-400 mb-2 flex items-center gap-2">
+            <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i>
+            自訂原始本金 ($ USD)
+          </label>
+          <div class="relative flex items-center">
+            <span class="absolute left-4 text-slate-400 font-bold text-lg">$</span>
+            <input 
+              type="number" 
+              id="principalInput" 
+              value="100000" 
+              min="1" 
+              step="1000"
+              class="w-full bg-slate-800 text-white font-mono font-bold text-xl sm:text-2xl pl-9 pr-4 py-2.5 rounded-xl border border-slate-700 focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="updateCalculator()"
+            >
+          </div>
+        </div>
+
+        <!-- 快速情境按鈕組 -->
+        <div class="lg:col-span-7 flex flex-wrap items-center gap-2.5">
+          <span class="text-xs font-medium text-slate-400 w-full sm:w-auto mr-1">快速切換跌幅：</span>
+          <button onclick="setLoss(10)" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95 flex items-center gap-1.5">
+            <span>跌 10%</span> <span class="text-emerald-400">(+11.1%)</span>
+          </button>
+          <button onclick="setLoss(20)" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95 flex items-center gap-1.5">
+            <span>跌 20%</span> <span class="text-emerald-400">(+25%)</span>
+          </button>
+          <button onclick="setLoss(50)" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-orange-950/40 hover:bg-orange-900/40 text-orange-300 border border-orange-500/30 transition-all active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>跌 50%</span> <span class="text-orange-400 font-bold">(+100%)</span>
+          </button>
+          <button onclick="setLoss(80)" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-rose-950/40 hover:bg-rose-900/40 text-rose-300 border border-rose-500/30 transition-all active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="skull" class="w-3.5 h-3.5 text-rose-400"></i>
+            <span>跌 80%</span> <span class="text-rose-400 font-bold">(+400%)</span>
+          </button>
+        </div>
+
       </div>
 
       <!-- 滑動條 Slider 控制區 -->
@@ -144,7 +174,7 @@
           step="1" 
           value="50" 
           class="w-full h-3 bg-slate-700 rounded-lg appearance-none cursor-pointer outline-none" 
-          oninput="updateCalculator(this.value)"
+          oninput="updateCalculator()"
         >
         <div class="flex justify-between text-xs text-slate-500 mt-2 font-mono">
           <span>-5% (微幅波動)</span>
@@ -156,14 +186,14 @@
       <!-- 動態數據面板 (3 個大字體卡片) -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         
-        <!-- 卡片 1：原始本金 -->
+        <!-- 卡片 1：原始本金 (動態顯示) -->
         <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
           <div class="flex items-center justify-between text-slate-400 mb-2">
             <span class="text-sm font-medium">1. 原始本金</span>
             <i data-lucide="wallet" class="w-5 h-5 text-slate-500"></i>
           </div>
           <div>
-            <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono">$100,000</div>
+            <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono" id="principalDisplay">$100,000</div>
             <p class="text-xs text-slate-500 mt-2">基準投資總額</p>
           </div>
         </div>
@@ -272,7 +302,7 @@
             <thead>
               <tr class="border-b border-slate-700/80 text-slate-400 font-semibold bg-slate-900/50">
                 <th class="py-3 px-4 rounded-l-xl">資產跌幅 (Loss)</th>
-                <th class="py-3 px-4">跌後剩餘本金 (基於 $100,000)</th>
+                <th class="py-3 px-4">跌後剩餘比例</th>
                 <th class="py-3 px-4">回本所需漲幅 (Required Gain)</th>
                 <th class="py-3 px-4 rounded-r-xl">難度評級</th>
               </tr>
@@ -280,43 +310,43 @@
             <tbody class="divide-y divide-slate-800 font-mono">
               <tr class="hover:bg-slate-800/50 transition-colors">
                 <td class="py-3.5 px-4 font-bold text-slate-200">-10%</td>
-                <td class="py-3.5 px-4 text-slate-300">$90,000</td>
+                <td class="py-3.5 px-4 text-slate-300">剩餘 90%</td>
                 <td class="py-3.5 px-4 text-emerald-400 font-bold">+11.1%</td>
                 <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">輕微可控</span></td>
               </tr>
               <tr class="hover:bg-slate-800/50 transition-colors">
                 <td class="py-3.5 px-4 font-bold text-slate-200">-20%</td>
-                <td class="py-3.5 px-4 text-slate-300">$80,000</td>
+                <td class="py-3.5 px-4 text-slate-300">剩餘 80%</td>
                 <td class="py-3.5 px-4 text-emerald-400 font-bold">+25.0%</td>
                 <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">黃金停損線</span></td>
               </tr>
               <tr class="hover:bg-slate-800/50 transition-colors">
                 <td class="py-3.5 px-4 font-bold text-slate-200">-30%</td>
-                <td class="py-3.5 px-4 text-slate-300">$70,000</td>
+                <td class="py-3.5 px-4 text-slate-300">剩餘 70%</td>
                 <td class="py-3.5 px-4 text-amber-400 font-bold">+42.9%</td>
                 <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">開始吃力</span></td>
               </tr>
               <tr class="hover:bg-slate-800/50 transition-colors bg-orange-950/20">
                 <td class="py-3.5 px-4 font-bold text-orange-300">-50%</td>
-                <td class="py-3.5 px-4 text-orange-200">$50,000</td>
+                <td class="py-3.5 px-4 text-orange-200">剩餘 50%</td>
                 <td class="py-3.5 px-4 text-orange-400 font-black text-base">+100.0%</td>
                 <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-orange-500/20 text-orange-300 border border-orange-500/30">資產腰斬 (翻倍才回本)</span></td>
               </tr>
               <tr class="hover:bg-slate-800/50 transition-colors">
                 <td class="py-3.5 px-4 font-bold text-rose-300">-70%</td>
-                <td class="py-3.5 px-4 text-slate-300">$30,000</td>
+                <td class="py-3.5 px-4 text-slate-300">剩餘 30%</td>
                 <td class="py-3.5 px-4 text-rose-400 font-bold">+233.3%</td>
                 <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">重度受創 (需 3.3 倍)</span></td>
               </tr>
               <tr class="hover:bg-slate-800/50 transition-colors bg-rose-950/30">
                 <td class="py-3.5 px-4 font-bold text-rose-400">-80%</td>
-                <td class="py-3.5 px-4 text-rose-200">$20,000</td>
+                <td class="py-3.5 px-4 text-rose-200">剩餘 20%</td>
                 <td class="py-3.5 px-4 text-rose-400 font-black text-base">+400.0%</td>
                 <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30">地獄虧損 (需翻 5 倍)</span></td>
               </tr>
               <tr class="hover:bg-slate-800/50 transition-colors">
                 <td class="py-3.5 px-4 font-bold text-rose-500">-90%</td>
-                <td class="py-3.5 px-4 text-slate-300">$10,000</td>
+                <td class="py-3.5 px-4 text-slate-300">剩餘 10%</td>
                 <td class="py-3.5 px-4 text-rose-500 font-black text-base">+900.0%</td>
                 <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-rose-600/20 text-rose-400 border border-rose-600/30">毀滅性打擊 (需十倍股)</span></td>
               </tr>
@@ -342,7 +372,7 @@
               </div>
               <h4 class="text-lg font-bold text-white mb-2">百分比的底數陷阱</h4>
               <p class="text-sm text-slate-400 leading-relaxed">
-                扣款與獲利是以「當下剩餘的金額」為分母計算。跌 50% 時分母是 $100,000；回本時分母卻只剩下 $50,000，因此需要 100% 的上漲幅度才能補回相同的絕對金額。
+                扣款與獲利是以「當下剩餘的金額」為分母計算。跌 50% 時分母是原始金額；回本時分母卻只剩一半，因此需要 100% 的上漲幅度才能補回相同的絕對金額。
               </p>
             </div>
             <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-orange-400 font-semibold">
@@ -399,18 +429,15 @@
 
   <!-- Vanilla JavaScript 邏輯 -->
   <script>
-    // 初始化 Lucide Icons
     lucide.createIcons();
 
-    // Chart.js 全局字體設定
     Chart.defaults.color = '#94A3B8';
     Chart.defaults.font.family = 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-    const INITIAL_PRINCIPAL = 100000;
     let barChartInstance = null;
     let curveChartInstance = null;
 
-    // 計算回本所需漲幅公式: (Loss / (100 - Loss)) * 100
+    // 計算回本所需漲幅公式
     function calculateNeededGain(lossPercent) {
       return (lossPercent / (100 - lossPercent)) * 100;
     }
@@ -420,17 +447,28 @@
       return '$' + Math.round(val).toLocaleString();
     }
 
+    // 取得輸入的本金數字 (包含防呆)
+    function getPrincipal() {
+      const input = document.getElementById('principalInput');
+      let val = parseFloat(input.value);
+      if (isNaN(val) || val <= 0) {
+        val = 0;
+      }
+      return val;
+    }
+
     // 更新計算機狀態與介面
-    function updateCalculator(lossValue) {
-      const loss = parseFloat(lossValue);
+    function updateCalculator() {
+      const principal = getPrincipal();
+      const loss = parseFloat(document.getElementById('lossSlider').value);
       const lossRatio = loss / 100;
-      const remaining = INITIAL_PRINCIPAL * (1 - lossRatio);
-      const lossAmount = INITIAL_PRINCIPAL - remaining;
+      const remaining = principal * (1 - lossRatio);
+      const lossAmount = principal - remaining;
       const neededGainPercent = calculateNeededGain(loss);
 
       // 1. 更新 UI 數字
-      document.getElementById('lossSlider').value = loss;
       document.getElementById('lossValueDisplay').innerText = `-${loss}%`;
+      document.getElementById('principalDisplay').innerText = formatCurrency(principal);
       document.getElementById('remainingAmount').innerText = formatCurrency(remaining);
       document.getElementById('lossAmountDetail').innerText = `虧損金額: -${formatCurrency(lossAmount)}`;
       document.getElementById('neededGain').innerText = `+${neededGainPercent.toFixed(1)}%`;
@@ -443,9 +481,10 @@
       updateCharts(loss, neededGainPercent);
     }
 
-    // 快捷按鈕切換
+    // 快捷按鈕切換跌幅
     function setLoss(val) {
-      updateCalculator(val);
+      document.getElementById('lossSlider').value = val;
+      updateCalculator();
     }
 
     // 依據跌幅等級動態改變警語
@@ -486,7 +525,6 @@
 
     // 初始化 Chart.js 圖表
     function initCharts() {
-      // 1. 柱狀對比圖
       const ctxBar = document.getElementById('comparisonChart').getContext('2d');
       barChartInstance = new Chart(ctxBar, {
         type: 'bar',
@@ -528,7 +566,6 @@
         }
       });
 
-      // 2. 非對稱曲線圖 (Asymmetric Risk Curve)
       const curveDataX = [];
       const curveDataY = [];
       for (let l = 5; l <= 90; l += 5) {
@@ -589,10 +626,9 @@
       }
     }
 
-    // 頁面載入時初始化
     window.addEventListener('DOMContentLoaded', () => {
       initCharts();
-      updateCalculator(50); // 預設 50%
+      updateCalculator();
     });
   </script>
 </body>
