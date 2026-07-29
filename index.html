@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>非對稱風險：跌下去容易，漲回來難</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0F172A',
+              card: '#1E293B',
+              border: '#334155',
+              orange: '#F97316',
+              green: '#10B981',
+              blue: '#6366F1'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Slider Custom Styling */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #F97316;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
+      transition: all 0.2s ease-in-out;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 18px rgba(249, 115, 22, 0.8);
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #F97316;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-[#0F172A] text-slate-100 font-sans antialiased selection:bg-orange-500 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Header / Navbar -->
+  <header class="border-b border-slate-800 bg-[#0F172A]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+          <i data-lucide="trending-down" class="w-5 h-5 text-white"></i>
+        </div>
+        <span class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-orange-400 bg-clip-text text-transparent">
+          Risk Math LAB
+        </span>
+      </div>
+      <div class="text-xs sm:text-sm text-slate-400 flex items-center gap-2">
+        <i data-lucide="shield-alert" class="w-4 h-4 text-orange-400"></i>
+        非對稱風險（Asymmetric Risk）互動教室
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16 flex-grow">
+
+    <!-- 1. Hero 區塊 -->
+    <section class="text-center relative py-6">
+      <!-- Glow Background -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-orange-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs sm:text-sm font-medium mb-6">
+          <i data-lucide="calculator" class="w-4 h-4"></i>
+          投資理財必修第一課
+        </div>
+        
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+          非對稱風險：<span class="bg-gradient-to-r from-orange-400 via-rose-400 to-amber-300 bg-clip-text text-transparent">跌下去容易，漲回來難</span>
+        </h1>
+
+        <p class="mt-6 text-base sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+          為什麼跌 <span class="text-rose-400 font-bold">50%</span> 需要漲 <span class="text-emerald-400 font-bold">100%</span> 才能回本？拉動下方數據滑桿，用直觀的數據與動態圖表親自體驗「數學的殘酷真相」。
+        </p>
+      </div>
+    </section>
+
+    <!-- 2. 核心互動計算機區塊 -->
+    <section class="bg-[#1E293B] border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-700/60 pb-5 mb-8">
+        <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
+          <i data-lucide="sliders" class="w-6 h-6 text-orange-400"></i>
+          互動實驗計算機
+        </h2>
+        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">可拖動滑桿即時計算</span>
+      </div>
+
+      <!-- 快速情境按鈕組 -->
+      <div class="mb-8 flex flex-wrap items-center gap-3">
+        <span class="text-sm font-medium text-slate-400 mr-1">快速切換情境：</span>
+        <button onclick="setLoss(10)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95 flex items-center gap-1.5">
+          <span>跌 10%</span> <span class="text-xs text-emerald-400">(回本 +11.1%)</span>
+        </button>
+        <button onclick="setLoss(20)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95 flex items-center gap-1.5">
+          <span>跌 20%</span> <span class="text-xs text-emerald-400">(回本 +25%)</span>
+        </button>
+        <button onclick="setLoss(50)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-orange-950/40 hover:bg-orange-900/40 text-orange-300 border border-orange-500/30 transition-all active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>跌 50%</span> <span class="text-xs text-orange-400 font-bold">(回本 +100%)</span>
+        </button>
+        <button onclick="setLoss(80)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-950/40 hover:bg-rose-900/40 text-rose-300 border border-rose-500/30 transition-all active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="skull" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>跌 80%</span> <span class="text-xs text-rose-400 font-bold">(回本 +400%)</span>
+        </button>
+      </div>
+
+      <!-- 滑動條 Slider 控制區 -->
+      <div class="mb-10 bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
+        <div class="flex justify-between items-center mb-3">
+          <label for="lossSlider" class="text-sm font-bold text-slate-300 flex items-center gap-2">
+            選擇資產跌幅 (Loss %)
+          </label>
+          <div class="text-2xl font-black text-rose-400 font-mono" id="lossValueDisplay">-50%</div>
+        </div>
+        <input 
+          type="range" 
+          id="lossSlider" 
+          min="5" 
+          max="95" 
+          step="1" 
+          value="50" 
+          class="w-full h-3 bg-slate-700 rounded-lg appearance-none cursor-pointer outline-none" 
+          oninput="updateCalculator(this.value)"
+        >
+        <div class="flex justify-between text-xs text-slate-500 mt-2 font-mono">
+          <span>-5% (微幅波動)</span>
+          <span>-50% (資產腰斬)</span>
+          <span>-95% (接近歸零)</span>
+        </div>
+      </div>
+
+      <!-- 動態數據面板 (3 個大字體卡片) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        
+        <!-- 卡片 1：原始本金 -->
+        <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-sm font-medium">1. 原始本金</span>
+            <i data-lucide="wallet" class="w-5 h-5 text-slate-500"></i>
+          </div>
+          <div>
+            <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono">$100,000</div>
+            <p class="text-xs text-slate-500 mt-2">基準投資總額</p>
+          </div>
+        </div>
+
+        <!-- 卡片 2：跌落後剩餘金額 -->
+        <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-xl pointer-events-none"></div>
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-sm font-medium">2. 跌落後剩餘金額</span>
+            <i data-lucide="trending-down" class="w-5 h-5 text-rose-400"></i>
+          </div>
+          <div>
+            <div class="text-3xl sm:text-4xl font-extrabold text-rose-400 font-mono" id="remainingAmount">$50,000</div>
+            <p class="text-xs text-rose-400/80 mt-2 font-medium" id="lossAmountDetail">虧損金額: -$50,000</p>
+          </div>
+        </div>
+
+        <!-- 卡片 3：回本需要的漲幅 -->
+        <div class="bg-slate-900/90 border-2 border-orange-500/40 p-6 rounded-2xl flex flex-col justify-between relative overflow-hidden shadow-lg shadow-orange-500/10">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-xl pointer-events-none"></div>
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-sm font-semibold text-orange-400">3. 回本需要的漲幅</span>
+            <i data-lucide="arrow-up-right" class="w-6 h-6 text-orange-400"></i>
+          </div>
+          <div>
+            <div class="text-4xl sm:text-5xl font-black text-orange-400 font-mono tracking-tight" id="neededGain">+100.0%</div>
+            <p class="text-xs text-emerald-400 mt-2 font-medium" id="gainDetail">剩餘 $50,000 需賺取 +$50,000</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 情境文案提醒 -->
+      <div id="alertBox" class="p-4 sm:p-5 rounded-2xl bg-orange-950/30 border border-orange-500/30 flex items-start sm:items-center gap-4 transition-all duration-300">
+        <div id="alertIconContainer" class="p-2.5 rounded-xl bg-orange-500/20 text-orange-400 shrink-0">
+          <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <div class="font-bold text-white text-base sm:text-lg" id="alertTitle">資產腰斬！需要翻倍才能解套</div>
+          <p class="text-sm text-slate-300 mt-0.5" id="alertDescription">
+            跌幅達到 50% 時，底數直接縮減一半。你需要創造 +100% 的投資報酬率，才能讓資金回到最初的起跑點。
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 3. 視覺化圖表/對照區域 -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- 動態柱狀圖 Card -->
+      <div class="bg-[#1E293B] border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 text-orange-400"></i>
+              「虧損 vs. 回本」對比視覺化
+            </h3>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 mb-6">
+            請注意代表「回本漲幅」的綠色柱體，如何隨著虧損深度增加而呈現「指數級爆發」擴張。
+          </p>
+        </div>
+        
+        <div class="h-64 relative w-full flex items-center justify-center">
+          <canvas id="comparisonChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 指數型暴漲曲線趨勢圖 Card -->
+      <div class="bg-[#1E293B] border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
+              非對稱風險曲線 (Asymmetric Curve)
+            </h3>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 mb-6">
+            當虧損超過 20% 後，回本所需的上漲難度開始急速陡升（拋物線效應）。
+          </p>
+        </div>
+
+        <div class="h-64 relative w-full flex items-center justify-center">
+          <canvas id="curveChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 4. 完整對照表與三大核心啟示 -->
+    <section class="space-y-12">
+      
+      <!-- 對照表區塊 -->
+      <div class="bg-[#1E293B] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="table" class="w-5 h-5 text-orange-400"></i>
+            虧損與回本漲幅對照總覽表
+          </h3>
+          <span class="text-xs text-slate-400">標準數據對照</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b border-slate-700/80 text-slate-400 font-semibold bg-slate-900/50">
+                <th class="py-3 px-4 rounded-l-xl">資產跌幅 (Loss)</th>
+                <th class="py-3 px-4">跌後剩餘本金 (基於 $100,000)</th>
+                <th class="py-3 px-4">回本所需漲幅 (Required Gain)</th>
+                <th class="py-3 px-4 rounded-r-xl">難度評級</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 font-mono">
+              <tr class="hover:bg-slate-800/50 transition-colors">
+                <td class="py-3.5 px-4 font-bold text-slate-200">-10%</td>
+                <td class="py-3.5 px-4 text-slate-300">$90,000</td>
+                <td class="py-3.5 px-4 text-emerald-400 font-bold">+11.1%</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">輕微可控</span></td>
+              </tr>
+              <tr class="hover:bg-slate-800/50 transition-colors">
+                <td class="py-3.5 px-4 font-bold text-slate-200">-20%</td>
+                <td class="py-3.5 px-4 text-slate-300">$80,000</td>
+                <td class="py-3.5 px-4 text-emerald-400 font-bold">+25.0%</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">黃金停損線</span></td>
+              </tr>
+              <tr class="hover:bg-slate-800/50 transition-colors">
+                <td class="py-3.5 px-4 font-bold text-slate-200">-30%</td>
+                <td class="py-3.5 px-4 text-slate-300">$70,000</td>
+                <td class="py-3.5 px-4 text-amber-400 font-bold">+42.9%</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">開始吃力</span></td>
+              </tr>
+              <tr class="hover:bg-slate-800/50 transition-colors bg-orange-950/20">
+                <td class="py-3.5 px-4 font-bold text-orange-300">-50%</td>
+                <td class="py-3.5 px-4 text-orange-200">$50,000</td>
+                <td class="py-3.5 px-4 text-orange-400 font-black text-base">+100.0%</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-orange-500/20 text-orange-300 border border-orange-500/30">資產腰斬 (翻倍才回本)</span></td>
+              </tr>
+              <tr class="hover:bg-slate-800/50 transition-colors">
+                <td class="py-3.5 px-4 font-bold text-rose-300">-70%</td>
+                <td class="py-3.5 px-4 text-slate-300">$30,000</td>
+                <td class="py-3.5 px-4 text-rose-400 font-bold">+233.3%</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">重度受創 (需 3.3 倍)</span></td>
+              </tr>
+              <tr class="hover:bg-slate-800/50 transition-colors bg-rose-950/30">
+                <td class="py-3.5 px-4 font-bold text-rose-400">-80%</td>
+                <td class="py-3.5 px-4 text-rose-200">$20,000</td>
+                <td class="py-3.5 px-4 text-rose-400 font-black text-base">+400.0%</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30">地獄虧損 (需翻 5 倍)</span></td>
+              </tr>
+              <tr class="hover:bg-slate-800/50 transition-colors">
+                <td class="py-3.5 px-4 font-bold text-rose-500">-90%</td>
+                <td class="py-3.5 px-4 text-slate-300">$10,000</td>
+                <td class="py-3.5 px-4 text-rose-500 font-black text-base">+900.0%</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 text-xs font-sans rounded-md bg-rose-600/20 text-rose-400 border border-rose-600/30">毀滅性打擊 (需十倍股)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 三大核心啟示 Cards -->
+      <div>
+        <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <i data-lucide="lightbulb" class="w-6 h-6 text-amber-400"></i>
+          非對稱風險給投資人的三大核心啟示
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- Card 1 -->
+          <div class="bg-[#1E293B] border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 mb-4 font-mono font-bold">
+                01
+              </div>
+              <h4 class="text-lg font-bold text-white mb-2">百分比的底數陷阱</h4>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                扣款與獲利是以「當下剩餘的金額」為分母計算。跌 50% 時分母是 $100,000；回本時分母卻只剩下 $50,000，因此需要 100% 的上漲幅度才能補回相同的絕對金額。
+              </p>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-orange-400 font-semibold">
+              💡 底數變小，獲利難度翻倍
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-[#1E293B] border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 font-mono font-bold">
+                02
+              </div>
+              <h4 class="text-lg font-bold text-white mb-2">嚴格停損的戰略意義</h4>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                將虧損控制在 <strong class="text-emerald-400">10%~20%</strong> 以內時，回本所需的漲幅僅需 11%~25%，市場輕微反彈即可解套；一旦超過 50%，解套將變得極度依賴運氣與時間。
+              </p>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-emerald-400 font-semibold">
+              🛡️ 截斷虧損，保護本金血脈
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="bg-[#1E293B] border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 font-mono font-bold">
+                03
+              </div>
+              <h4 class="text-lg font-bold text-white mb-2">尋找「正向非對稱」</h4>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                聰明的投資者會避開「潛在下行無限、上行有限」的交易，專注尋找<strong class="text-indigo-300">「下行虧損有限（已知停損點），上行潛力巨大」</strong>的正向非對稱博弈。
+              </p>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-indigo-400 font-semibold">
+              🚀 追求高獲利風險比 (Risk-Reward)
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- 5. Footer -->
+  <footer class="border-t border-slate-800 bg-[#0F172A] py-8 mt-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs sm:text-sm text-slate-500 space-y-2">
+      <p>Asymmetric Risk Interactive Tool &copy; 2026. Designed for Smart Investors.</p>
+      <p class="text-slate-600">本工具僅供教學與風險觀念展示使用，不構成任何投資買賣建議。</p>
+    </div>
+  </footer>
+
+  <!-- Vanilla JavaScript 邏輯 -->
+  <script>
+    // 初始化 Lucide Icons
+    lucide.createIcons();
+
+    // Chart.js 全局字體設定
+    Chart.defaults.color = '#94A3B8';
+    Chart.defaults.font.family = 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+    const INITIAL_PRINCIPAL = 100000;
+    let barChartInstance = null;
+    let curveChartInstance = null;
+
+    // 計算回本所需漲幅公式: (Loss / (100 - Loss)) * 100
+    function calculateNeededGain(lossPercent) {
+      return (lossPercent / (100 - lossPercent)) * 100;
+    }
+
+    // 格式化美金貨幣
+    function formatCurrency(val) {
+      return '$' + Math.round(val).toLocaleString();
+    }
+
+    // 更新計算機狀態與介面
+    function updateCalculator(lossValue) {
+      const loss = parseFloat(lossValue);
+      const lossRatio = loss / 100;
+      const remaining = INITIAL_PRINCIPAL * (1 - lossRatio);
+      const lossAmount = INITIAL_PRINCIPAL - remaining;
+      const neededGainPercent = calculateNeededGain(loss);
+
+      // 1. 更新 UI 數字
+      document.getElementById('lossSlider').value = loss;
+      document.getElementById('lossValueDisplay').innerText = `-${loss}%`;
+      document.getElementById('remainingAmount').innerText = formatCurrency(remaining);
+      document.getElementById('lossAmountDetail').innerText = `虧損金額: -${formatCurrency(lossAmount)}`;
+      document.getElementById('neededGain').innerText = `+${neededGainPercent.toFixed(1)}%`;
+      document.getElementById('gainDetail').innerText = `剩餘 ${formatCurrency(remaining)} 需賺取 +${formatCurrency(lossAmount)}`;
+
+      // 2. 更新情境文案與 Alert 外觀
+      updateAlertBox(loss, neededGainPercent);
+
+      // 3. 更新圖表視覺
+      updateCharts(loss, neededGainPercent);
+    }
+
+    // 快捷按鈕切換
+    function setLoss(val) {
+      updateCalculator(val);
+    }
+
+    // 依據跌幅等級動態改變警語
+    function updateAlertBox(loss, neededGain) {
+      const alertBox = document.getElementById('alertBox');
+      const iconContainer = document.getElementById('alertIconContainer');
+      const title = document.getElementById('alertTitle');
+      const desc = document.getElementById('alertDescription');
+
+      if (loss <= 20) {
+        alertBox.className = "p-4 sm:p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex items-start sm:items-center gap-4 transition-all duration-300";
+        iconContainer.className = "p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0";
+        iconContainer.innerHTML = `<i data-lucide="shield-check" class="w-6 h-6"></i>`;
+        title.innerText = `輕微虧損 (-${loss}%)：回本相對容易 (+${neededGain.toFixed(1)}%)`;
+        desc.innerText = `此區間屬於可控風險範疇。嚴格在此範圍停損，能大幅降低本金歸零風險，市場稍微反彈即可快速復元。`;
+      } else if (loss <= 45) {
+        alertBox.className = "p-4 sm:p-5 rounded-2xl bg-amber-950/30 border border-amber-500/30 flex items-start sm:items-center gap-4 transition-all duration-300";
+        iconContainer.className = "p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0";
+        iconContainer.innerHTML = `<i data-lucide="alert-circle" class="w-6 h-6"></i>`;
+        title.innerText = `中度受創 (-${loss}%)：需要上漲 +${neededGain.toFixed(1)}% 才能解套`;
+        desc.innerText = `本金已受顯著傷害。你必須取得超過大盤歷史平均年化報酬率數倍的績效，才能平復此項虧損。`;
+      } else if (loss <= 65) {
+        alertBox.className = "p-4 sm:p-5 rounded-2xl bg-orange-950/40 border border-orange-500/40 flex items-start sm:items-center gap-4 transition-all duration-300";
+        iconContainer.className = "p-2.5 rounded-xl bg-orange-500/20 text-orange-400 shrink-0";
+        iconContainer.innerHTML = `<i data-lucide="zap" class="w-6 h-6"></i>`;
+        title.innerText = `資產嚴重腰斬 (-${loss}%)：需要翻倍 (+${neededGain.toFixed(1)}%) 才能解套`;
+        desc.innerText = `當虧損達到 50% 以上，底數嚴重萎縮。你需要創造雙倍、甚至數倍的超級績效才有機會拯救這筆投資。`;
+      } else {
+        alertBox.className = "p-4 sm:p-5 rounded-2xl bg-rose-950/50 border border-rose-500/50 flex items-start sm:items-center gap-4 transition-all duration-300";
+        iconContainer.className = "p-2.5 rounded-xl bg-rose-500/20 text-rose-400 shrink-0";
+        iconContainer.innerHTML = `<i data-lucide="skull" class="w-6 h-6"></i>`;
+        title.innerText = `地獄級虧損 (-${loss}%)：需要上漲 +${neededGain.toFixed(1)}% (翻 ${(1 + neededGain/100).toFixed(1)} 倍)`;
+        desc.innerText = `災難性打擊！本金殘值極低，此時解套幾乎需要找到下一個「十倍飆股」。切記：絕不要讓任何持股陷入此等深淵。`;
+      }
+      
+      lucide.createIcons();
+    }
+
+    // 初始化 Chart.js 圖表
+    function initCharts() {
+      // 1. 柱狀對比圖
+      const ctxBar = document.getElementById('comparisonChart').getContext('2d');
+      barChartInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: ['當前資產跌幅 (%)', '解套所需漲幅 (%)'],
+          datasets: [{
+            data: [50, 100],
+            backgroundColor: ['rgba(244, 63, 94, 0.85)', 'rgba(16, 185, 129, 0.85)'],
+            borderColor: ['#F43F5E', '#10B981'],
+            borderWidth: 1.5,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.raw.toFixed(1)}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(51, 65, 85, 0.4)' },
+              ticks: {
+                callback: function(value) { return value + '%'; }
+              }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      // 2. 非對稱曲線圖 (Asymmetric Risk Curve)
+      const curveDataX = [];
+      const curveDataY = [];
+      for (let l = 5; l <= 90; l += 5) {
+        curveDataX.push(`-${l}%`);
+        curveDataY.push(calculateNeededGain(l));
+      }
+
+      const ctxCurve = document.getElementById('curveChart').getContext('2d');
+      curveChartInstance = new Chart(ctxCurve, {
+        type: 'line',
+        data: {
+          labels: curveDataX,
+          datasets: [{
+            label: '所需漲幅 %',
+            data: curveDataY,
+            borderColor: '#F97316',
+            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#F97316'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => `跌幅 ${items[0].label}`,
+                label: (item) => `回本需上漲 +${parseFloat(item.raw).toFixed(1)}%`
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(51, 65, 85, 0.4)' },
+              ticks: {
+                callback: function(value) { return '+' + value + '%'; }
+              }
+            },
+            x: {
+              grid: { color: 'rgba(51, 65, 85, 0.2)' }
+            }
+          }
+        }
+      });
+    }
+
+    // 更新圖表數據
+    function updateCharts(loss, neededGain) {
+      if (barChartInstance) {
+        barChartInstance.data.datasets[0].data = [loss, neededGain];
+        barChartInstance.update();
+      }
+    }
+
+    // 頁面載入時初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      initCharts();
+      updateCalculator(50); // 預設 50%
+    });
+  </script>
+</body>
+</html>
